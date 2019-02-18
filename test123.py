@@ -77,6 +77,7 @@ def main():
         print(derivative)
         change = kp*error + ki*integral + kd*derivative
         change = change/100
+        #add if() statment to stop the motor if the distance is correct
         mb.run_direct(duty_cycle_sp=sp+change)
         mc.run_direct(duty_cycle_sp=-sp-change)
 
