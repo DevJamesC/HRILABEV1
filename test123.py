@@ -97,3 +97,42 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    #PID controller:
+    #tp=50 #target power, which is 50% power on both motors. may just be reworded to tsp(target speed) if we can't do % power
+    #kp=100 #the constant for the proportional controller, or how fast it turns to corrects. 10 is just a wild guess. 
+            # additionally kp=10(*10) because we divide p by 10 after the calculation to help the robot process ints. apparently...
+            # it doesn't like floats, so we multiply a 10 to 99 kp value by 10, and a .1 to 1 kp value by 100
+    #ki=10 # constant for the integral controller, or how fast it adds extra gentle turn. good for fixing small past errors. also divided by 10.
+    #kd=1000 # constant for the derivitive controller, or how fast it preemptivly adds/ subtracts turn based on the integral. also divided by 10
+    #target= 5000 #set the target distance. This is also known as the "offset".
+    
+    #setting containers for varibles to be used
+    #intergral=0
+    #lastError=0
+    #derivitive=0
+    
+    #while true 
+    #error= target-distanceReadFromUltrasonicSensor #calculate the difference from the current position to the desired position
+    #dt= code to get a second passing from the system clock. # dt is the delta time since the program started running.
+    #integral= ((2/3)*integral)+(error*dt) #the integral is the sum of all errors over time, reduced by 1/3rd every tick so it doesn't go out of control
+    #derivitive= error-lastError # the derivitive is the estimated next error based on the last error and the current error.
+    #P= (kp*error)+(ki*integral)+(kd*derivitive) #if error is 0, do not turn, P is the total rate of turn
+    #p=p/10
+    #if (tp-P>0) #moves the motors. apparently they don't understand negative values (maybe the article was working on a differnt bot?)
+       #mb.run_direct(tp-P)
+    #else
+        #mb.run_direct((tp-P)*-1)
+    #if(tp+p>0)
+        #mc.run_direct(tp+P)
+        #some code to reverse the motor
+    #else
+        #mc.run_direct((tp+P)*-1)
+        #some code to reverse the motor
+    #lastError=error
+    
+    #getting values for the Ziegler–Nichols Method
+    #kc= kp, when kp follows the line, but gives frequent non-crazy oscillation  (other values set to 0)
+    #pc = the amount of time it takes for the robot to go from perigee-apogee-perigee (perigee to perigee) in the oscillation
+    #dt=the amount of time it takes for the robot to cycle through the loop once (run the loop 10,000 times, have the bot count in realtime, and divide)
+    
