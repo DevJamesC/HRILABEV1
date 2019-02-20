@@ -51,36 +51,49 @@ def main():
     set_cursor(OFF)
     set_font('Lat15-Terminus24x12')
 
-    # announce program start
-    ev3.Sound.speak('Hey whatsup dude').wait()
+    # display something on the screen of the device
+    print('Hello World!')
 
-    # set the motor variables
+    # print something to the output panel in VS Code
+    debug_print('Hello VS Code!')
+
+    # announce program start
+    #ev3.Sound.speak('Test program starting!').wait()
+
+  # set the motor variables
     mb = ev3.LargeMotor('outB')
     mc = ev3.LargeMotor('outC')
     us3 = ev3.UltrasonicSensor('in3')
     sp = -10
-    kp = 1000
+    kp = 100
     ki = 100
     kd = 10000
     integral = 0
     derivative = 0
-    offset = 100
+    offset = 5000
     lastError = 0
+   
+    
 
     while True:
         time.process_time() 
         ds = us3.value()
-        error = ds - offset
+        error = ds - offset 
         integral = integral + error
         print(integral)
         derivative = error - lastError
         print(derivative)
         change = kp*error + ki*integral + kd*derivative
         change = change/100
-        #add if() statment to stop the motor if the distance is correct
-        mb.run_direct(duty_cycle_sp=sp+change)
-        mc.run_direct(duty_cycle_sp=-sp-change)
+        delta1=sp+change
+        delta2=sp-change
+       
+        #if(ds=offest):
+        mb.run_direct(duty_cycle_sp=delta1)
+        mc.run_direct(duty_cycle_sp=delta2)
+      #  else:
+          #  mb.run_direct(duty_cycle_sp=0)
+         #   mc.run_direct(duty_cycle_sp=0)
 
-
-#if __name__ == '__main__':
-#   main()
+if __name__ == '__main__':
+    main()
