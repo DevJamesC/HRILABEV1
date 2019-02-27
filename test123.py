@@ -66,13 +66,13 @@ def main():
     mb = ev3.LargeMotor('outB')
     mc = ev3.LargeMotor('outC')
     us3 = ev3.UltrasonicSensor('in3') #set ultrasonic sensor var
-    tp=1 #target power, which is 50% power on both motors. may just be reworded to tsp(target speed) if we can't do % power
-    kp=100 #the constant for the proportional controller, or how fast it turns to corrects. 10 is just a wild guess. 
+    tp=20 #target power, which is 50% power on both motors. may just be reworded to tsp(target speed) if we can't do % power
+    kp=3700 #the constant for the proportional controller, or how fast it turns to corrects. 10 is just a wild guess. 
             # additionally kp=10(*10) because we divide p by 10 after the calculation to help the robot process ints. apparently...
             # it doesn't like floats, so we multiply a 10 to 99 kp value by 10, and a .1 to 1 kp value by 100
-    ki=1 # constant for the integral controller, or how fast it adds extra gentle turn. good for fixing small past errors. also divided by 10.
-    kd=1 # constant for the derivitive controller, or how fast it preemptivly adds/ subtracts turn based on the integral. also divided by 10
-    target= 50000 #set the target distance. This is also known as the "offset".
+    ki=0 # constant for the integral controller, or how fast it adds extra gentle turn. good for fixing small past errors. also divided by 10.
+    kd=0 # constant for the derivitive controller, or how fast it preemptivly adds/ subtracts turn based on the integral. also divided by 10
+    target= 500  #set the target distance. This is also known as the "offset".
     
 
     #setting containers for varibles to be used. Don't modify these, the code does that
@@ -84,24 +84,29 @@ def main():
     while True: 
         error= target-us3.value() #calculate the difference from the current position to the desired position
         dt= time.time()-startTime # dt is the delta time since the program started running.
+        debug_print(us3.value())
         integral= ((2/3)*integral)+(error*dt) #the integral is the sum of all errors over time, reduced by 1/3rd every tick so it doesn't go out of control
-        debug_print(dt)
+        #debug_print(dt)
         derivitive= error-lastError # the derivitive is the estimated next error based on the last error and the current error.
         p= (kp*error)+(ki*integral)+(kd*derivitive) #if error is 0, do not turn, P is the total rate of turn
-        p=p/100000     
-        debug_print('error is: '+str(error))
-        debug_print('integral: ' +str(integral))
-        debug_print('derivitive is: '+str(derivitive))
-        debug_print('toatl is: '+str(p))
+        p=p/1000   
+       # debug_print('error is: '+str(error))
+        #debug_print('integral: ' +str(integral))
+       # debug_print('derivitive is: '+str(derivitive))
+       # debug_print('toatl is: '+str(p))
         mbMove=tp+p
-        mcMove=tp-p
+        mcMove=tp+p
         if(mbMove>=90):
             mbMove=90
+        if(mbMove<=-90):
+            mbMove=-90
         if(mcMove<=-90):
             mcMove=-90
-
-        mb.run_direct(duty_cycle_sp=mbMove)
-        mc.run_direct(duty_cycle_sp=mcMove)
+        if(mcMove>=90):
+            mcMove=90
+        if(error!=0):
+            mb.run_direct(duty_cycle_sp=-mbMove)
+            mc.run_direct(duty_cycle_sp=-mcMove)
    
    # if (tp-P>0) #moves the motors. apparently they don't understand negative values (maybe the article was working on a differnt bot?)
     #   mb.run_direct(tp-P)
