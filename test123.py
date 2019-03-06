@@ -68,11 +68,11 @@ def main():
    # us3 = ev3.UltrasonicSensor('in3') #set ultrasonic sensor var
     us2 =ev3.UltrasonicSensor('in2')
     tp=50 #target power, which is 50% power on both motors. may just be reworded to tsp(target speed) if we can't do % power
-    kp=22.2 #the constant for the proportional controller, or how fast it turns to corrects. 10 is just a wild guess. 
+    kp=1 #the constant for the proportional controller, or how fast it turns to corrects. 10 is just a wild guess. 
             # additionally kp=10(*10) because we divide p by 10 after the calculation to help the robot process ints. apparently...
             # it doesn't like floats, so we multiply a 10 to 99 kp value by 10, and a .1 to 1 kp value by 100
-    ki=55.2 # constant for the integral controller, or how fast it adds extra gentle turn. good for fixing small past errors. also divided by 10.
-    kd=2.081 # constant for the derivitive controller, or how fast it preemptivly adds/ subtracts turn based on the integral. also divided by 10
+    ki=0 # constant for the integral controller, or how fast it adds extra gentle turn. good for fixing small past errors. also divided by 10.
+    kd=0 # constant for the derivitive controller, or how fast it preemptivly adds/ subtracts turn based on the integral. also divided by 10
     target= 500  #set the target distance. This is also known as the "offset". currently unused
     
 
@@ -81,34 +81,37 @@ def main():
     integral=0
     lastError=0
     derivitive=0
+    mcMove=0
+    mbMove=0
     
     while True: 
         error= target - us2.value()#-us3.value() #calculate the  difference from the current position to the desired position
         dt= time.time()-startTime # dt is the delta time since the program started running.
-        #debug_print(us2.value())
-        integral= ((2/3)*integral)+(error*dt) #the integral is the sum of all errors over time, reduced by 1/3rd every tick so it doesn't go out of control
-        #debug_print(dt)
+        debug_print(us2.value())
+        integral= ((1/10)*integral)+(error*dt) #the integral is the sum of all errors over time, reduced by 1/3rd every tick so it doesn't go out of control
+        debug_print(dt)
         derivitive= error-lastError # the derivitive is the estimated next error based on the last error and the current error.
         p= (kp*error)+(ki*integral)+(kd*derivitive) #if error is 0, do not turn, P is the total rate of turn
-        p=p/100
-       # debug_print('error is: '+str(error))
-        #debug_print('integral: ' +str(integral))
-       # debug_print('derivitive is: '+str(derivitive))
-       # debug_print('toatl is: '+str(p))
-        mbMove=tp-p
-        mcMove=tp-p
+        p=p/1000
+        debug_print('error is: '+str(error))
+        debug_print('integral: ' +str(integral))
+        debug_print('derivitive is: '+str(derivitive))
+        debug_print('toatl is: '+str(p))       
+        mbMove=mbMove-p 
+        mcMove=mcMove+p
 
-        if(mbMove>=90): #setting move caps (at 90% power)
-            mbMove=90
-        if(mbMove<=-90):
-            mbMove=-90
-        if(mcMove<=-90):
-            mcMove=-90
-        if(mcMove>=90):
-            mcMove=90
+        if(mbMove>=70): #setting move caps (at 90% power)
+            mbMove=70
+        if(mbMove<=-70):
+            mbMove=-70
+        if(mcMove<=-70):
+            mcMove=-70
+        if(mcMove>=70):
+            mcMove=70
         #if(error>1 or error<-1):
-        mb.run_direct(duty_cycle_sp=-mbMove)
-        mc.run_direct(duty_cycle_sp=-mcMove)
+        
+        mb.run_direct(duty_cycle_sp=mbMove+30)
+        mc.run_direct(duty_cycle_sp=mcMove+30)
         if(integral>1000): #capping integral
             integral=1000
    
